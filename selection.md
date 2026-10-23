@@ -1,4 +1,4 @@
-# How the tests and the (test, mutant) pairs were chosen
+# Details of the evaluation setup
 
 This page gives the details of the setup of the evaluation in the FPBT 2027 talk abstract on postcondition-aware residual risk estimation for property-based testing.
 
@@ -19,3 +19,7 @@ So that SUT coverage alone could reasonably leave a bug unfound while the post-p
 As faults, we put mutants into the SUT: every single change, at an SUT line a chosen test runs, by a mutation operator of [mutmut](https://github.com/boxed/mutmut), the Python mutation testing tool that Ravi and Coblenz used, such as `<` to `<=` or `+` to `-`. Each mutant and the chosen test that runs its line form a (test, mutant) pair: 1,499 pairs.
 
 The true risk of a pair is the probability that an input drawn from the test's generator violates the property. We estimate it by Monte Carlo sampling of independent inputs, stopping at 100 violations. It was measured as at least $10^{-4}$ on 712 pairs (752 pairs are below $10^{-4}$, and 35 could not be measured). The 194 pairs whose true risk is below 0.05 are evaluated; they are on six of the nine tests, from four projects: ndindex (array indexing), MyGrad (automatic differentiation), clkhash (record linkage) and pyscal (reservoir simulation).
+
+## Campaigns
+
+A developer can stop a campaign at any point before it finds a counterexample, so a risk estimate must hold whatever length the campaign ends at. For each pair we therefore run 100 campaigns, each a sequence of passing executions as long as a run of the test that has not yet found a counterexample: with true risk $p$, a run passes $l$ inputs in a row with probability $(1-p)^l$, and we draw each campaign's length from this distribution, up to its 95th percentile. For the fault of Figure 1 of the abstract ($p = 0.0044$), the lengths range from 4 to 673 executions; the campaign of 292 executions in Section 2 of the abstract is one of them. Every estimator is computed on the same campaigns.
